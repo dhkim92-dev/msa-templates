@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("api/v1/")
 @Tag(name = "Notification API")
-class NotificationController(private val notificationService: NotificationService){
+class NotificationController(
+    private val notificationService: NotificationService,
+    private val notificationProducer: NotificationProducer
+){
 
     @Operation(summary = "노티피케이션 전송", description = "특정 사용자에게 노티피케이션을 전송한다.")
     @ApiResponses(value = [
@@ -27,7 +30,7 @@ class NotificationController(private val notificationService: NotificationServic
     @ResponseStatus(code = HttpStatus.CREATED)
     fun sendNotification(@RequestBody request: NotificationSendRequestVo): NotificationSendResponseVo {
         val responseDto = notificationService.sendMessage(request = NotificationSendRequestDto(receiver = request.receiver, msg = request.msg))
-        notificationService.publishSendNotificationRedisTopic(responseDto)
+        notificationProducer.publishNotificationEvent(responseDto)
         return NotificationSendResponseVo(responseDto.receiver, responseDto.message, responseDto.createdAt)
     }
 }

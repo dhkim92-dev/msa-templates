@@ -1,12 +1,13 @@
-const { default: axios } = require('axios');
-const express = require('express');
+const { default: axios } = require("axios");
+const express = require("express");
 const app = express();
-const http = require('http');
+const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const { createAdapter } = require("@socket.io/redis-adapter");
 const Redis = require("ioredis")
-const os = require('os')
+const os = require("os")
+const {Kafka} = require("kafkajs")
 
 console.log("SERVICE_PORT : " + process.env.SERVICE_PORT)
 console.log("API_SERVER_URL : " + process.env.API_SERVER_URL)
@@ -20,12 +21,43 @@ const pubClient = new Redis({
 })
 const subClient = pubClient.duplicate()
 
+// kafka 구독
+
+const kafka = new Kafka({
+  clientId: "socket-io-server",
+  brokers: [process.env.KAFKA_BROKER]
+})
+
+const consumer = kafka.consumer({groupId: "notification-event-consumer"})
+
+const runKafkaConsumer = async () => {
+  await consumer.connect()
+  await consumer.subscribe({topic: "notification-event", fromBeginning: false})
+
+  await consumer.run({
+    eachMessage: async ({topic, partition, message}) => {
+      console.log("kafka event receive !")
+      console.log("from partition : " + partition + " message :" + message.value)
+      const parsed = JSON.parse(message.value.toString())
+      const roomName = "notification/"+parsed.receiver
+      console.log("emit RoomName: " + roomName)
+
+      io.to(roomName).emit("notification", message.value.toString())
+    }
+  })
+}
+
+runKafkaConsumer().catch((err)=>{
+
+})
 
 const io = new Server(server, {
   path: "/socket",
   cors : {
-    methods: ["POST", "GET"],
-    origin: "*"
+    methods: ["POST", "GET", "PUT", "DELETE", "OPTIONS"],
+    // origin: "*"
+    origin: "http://127.0.0.1:31080",
+    // credentials: true
   }
 });
 
@@ -63,7 +95,7 @@ io.use((sock, next) => {
   })
 })
 
-const connection = new Map()
+// const connection = new Map()
 
 io.on("connection", async (sock) => {
     console.log("new connection request.")
@@ -71,42 +103,15 @@ io.on("connection", async (sock) => {
     if(!sock.decoded.nickname) {
       sock.disconnect()
     }
-      console.log("connection will be stored with key : " + sock.decoded.nickname)
-
-    if(connection.has(sock.decoded.nickname)) {
-      disconnectSocket(connection.get(sock.decoded.nickname))
-    }
-    connection.set(sock.decoded.nickname, sock.id)
+    const roomName = "notification/"+sock.decoded.nickname
+    console.log("connection id : " + sock.id + " join room " + roomName)
+    sock.join(roomName)
 
     sock.on('disconnect', (reason) => {
         console.log("User disconnected. " + reason.toString());
-        connection.delete(sock.id)
+        sock.leave(roomName)
     });
 });
-
-subClient.subscribe("notification-send-event", (err, count) => {
-  if (err) {
-    console.error("Failed to subscribe: %s", err.message);
-  } else {
-    console.log(`Subscribed successfully! This client is currently subscribed to ${count} channels.`);
-  }
-});
-
-subClient.on("message", (channel, data) =>{
-  if(channel === "notification-send-event") {
-      console.log(getIPAddress() + " receive message " + data)
-    const {receiver, createdAt, message} = JSON.parse(data)
-    console.log("receiver : " + receiver)
-    console.log("connection has receiver ? " + connection.has(receiver))
-
-    if(connection.has(receiver)) {
-      io.to(connection.get(receiver)).emit("notification", data)
-    }else {
-      // send fcm logic...
-    }
-  }
-})
-
 
 function getIPAddress() {
   var interfaces = os.networkInterfaces();

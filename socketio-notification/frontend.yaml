@@ -31,7 +31,7 @@ spec:
       volumes:
       - name: frontend-workspace
         hostPath:
-          path: /Users/terrapin/workspace/study/socketio/frontend
+          path: /Users/terrapin/workspace/study/msa-samples/socketio-notification/frontend
           type: Directory
 ---
 apiVersion: v1

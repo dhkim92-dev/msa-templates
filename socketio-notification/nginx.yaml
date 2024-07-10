@@ -25,7 +25,7 @@ spec:
       volumes:
       - name: nginx-volume
         hostPath:
-          path: /Users/terrapin/workspace/study/socketio/infra/nginx/default.conf
+          path: /Users/terrapin/workspace/study/msa-samples/socketio-notification/infra/nginx/default.conf
 ---
 apiVersion: v1
 kind: Service

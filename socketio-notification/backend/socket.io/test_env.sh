@@ -2,4 +2,5 @@ export REDIS_HOST="127.0.0.1"
 export REDIS_PORT="31379"
 export REDIS_PASSWORD="redis1234"
 export API_SERVER_URL="http://127.0.0.1:8080"
+export KAFKA_BROKER="127.0.0.1:31092"
 export SERVICE_PORT=3001

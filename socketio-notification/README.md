@@ -12,8 +12,14 @@
 ## 실행 방법
 <span style="font-size: 12px; color: green">모든 Kubernetes file의 HostPath를 수정할 것</span>
 1. redis 시작 kubectl apply -f redis.yaml
-2. api 서버 시작 kubectl apply -f api.yaml
-3. socket.io 서버 시작 kubectl apply -f socket-io.yaml
-4. next 서버 시작 kubectl apply -f next.yaml
-5. nginx 서버 시작 kubectl apply -f nginx.yaml
+2. kafka 시작 kubectl apply -f kafka.yaml
+    - topic 생성 kubectl exec -it kafka-0. 터미널 진입 후 아래 커맨드 입력
+```bash sh
+# 토픽 생성
+$ kafka-topics --create --topic notifiaction-event --bootstrap-server=kafka-headless.default.svc.cluster.local:9092 --partitions=4
+```
+3. api 서버 시작 kubectl apply -f api.yaml
+4. socket.io 서버 시작 kubectl apply -f socket-io.yaml
+5. next 서버 시작 kubectl apply -f next.yaml
+6. nginx 서버 시작 kubectl apply -f nginx.yaml
 

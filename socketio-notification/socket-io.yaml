@@ -28,6 +28,8 @@ spec:
         - start
         - dev
         env:
+        - name: ORIGIN
+          value: "http://127.0.0.1:31080"
         - name: SERVICE_PORT
           value: "3000"
         - name: API_SERVER_URL
@@ -36,10 +38,12 @@ spec:
           value: "redis-svc.default.svc.cluster.local"
         - name: REDIS_PORT
           value: "6379"
+        - name: KAFKA_BROKER
+          value: kafka-headless.default.svc.cluster.local:9092
       volumes:
       - name: socket-workspace
         hostPath:
-          path: /Users/terrapin/workspace/study/socketio/backend/socket.io
+          path: /Users/terrapin/workspace/study/msa-samples/socketio-notification/backend/socket.io
           type: Directory
 ---
 apiVersion: v1
@@ -47,10 +51,11 @@ kind: Service
 metadata:
   name: socket-server-svc
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: socket
   ports:
   - name: socket-port
     port: 80
     targetPort: 3000
+  sessionAffinity: ClientIP

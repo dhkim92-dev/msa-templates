@@ -26,7 +26,7 @@ spec:
       volumes:
       - name: conf
         hostPath:
-          path: /Users/terrapin/workspace/study/socketio/infra/redis/redis.conf
+          path: /Users/terrapin/workspace/study/msa-samples/socketio-notification/infra/redis/redis.conf
           type: File
 ---
 apiVersion: v1
@@ -34,10 +34,11 @@ kind: Service
 metadata:
   name: redis-svc
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: redis
   ports:
   - name: redis-tcp
     port: 6379
     targetPort: 6379
+    nodePort: 31379
