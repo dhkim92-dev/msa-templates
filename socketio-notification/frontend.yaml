@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels: 
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: node:latest
+        ports:
+        - name: frontend-port
+          containerPort: 3000
+        volumeMounts:
+        - name: frontend-workspace
+          mountPath: /workspace
+        workingDir: /workspace
+        command:
+        - yarn
+        - next
+        - dev
+      volumes:
+      - name: frontend-workspace
+        hostPath:
+          path: /Users/terrapin/workspace/study/socketio/frontend
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-server-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+  - name: frontend-svc-http
+    protocol: TCP
+    port: 80
+    targetPort: 3000

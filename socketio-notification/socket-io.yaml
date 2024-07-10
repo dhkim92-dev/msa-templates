@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socket-deployment
+  labels:
+    app: socket
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: socket
+  template:
+    metadata:
+      labels:
+        app: socket
+    spec:
+      containers:
+      - name: socket
+        image: node:latest
+        ports:
+        - containerPort: 3000
+        workingDir: /workspace
+        volumeMounts:
+        - name: socket-workspace
+          mountPath: /workspace
+        command:
+        - yarn
+        - start
+        - dev
+        env:
+        - name: SERVICE_PORT
+          value: "3000"
+        - name: API_SERVER_URL
+          value: "http://nginx-svc.default.svc.cluster.local"
+        - name: REDIS_HOST
+          value: "redis-svc.default.svc.cluster.local"
+        - name: REDIS_PORT
+          value: "6379"
+      volumes:
+      - name: socket-workspace
+        hostPath:
+          path: /Users/terrapin/workspace/study/socketio/backend/socket.io
+          type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: socket-server-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: socket
+  ports:
+  - name: socket-port
+    port: 80
+    targetPort: 3000

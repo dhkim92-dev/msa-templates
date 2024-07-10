@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server-deployment
+  labels:
+    app: api-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-server
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+        - name: api-server
+          image: openjdk:17-slim
+          ports:
+          - containerPort: 8080
+          command:
+          - java
+          - -jar
+          - /application.jar
+          volumeMounts:
+          - name: application
+            mountPath: /application.jar
+      volumes:
+        - name: application
+          hostPath:
+            path: /Users/terrapin/workspace/study/socketio/backend/api/build/libs/demo-application.jar
+            type: File
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-server-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: api-server
+  ports:
+    - name: api-tcp
+      protocol: TCP
+      port: 80
+      targetPort: 8080

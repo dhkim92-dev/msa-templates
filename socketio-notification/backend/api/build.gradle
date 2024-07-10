@@ -1,0 +1,55 @@
+plugins {
+	id 'org.springframework.boot' version '3.3.1'
+	id 'io.spring.dependency-management' version '1.1.5'
+	id 'org.jetbrains.kotlin.jvm' version '1.9.24'
+	id 'org.jetbrains.kotlin.plugin.spring' version '1.9.24'
+	id("org.jetbrains.kotlin.plugin.jpa") version "1.9.24"
+}
+
+group = 'kr.dohoonKim.msa.examples'
+version = 'application'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+allOpen {
+	annotation("jakarta.persistence.Entity")
+	annotation("jakarta.persistence.MappedSuperclass")
+	annotation("jakarta.persistence.Embeddable")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.jetbrains.kotlin:kotlin-reflect'
+	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("com.h2database:h2:2.1.214")
+	implementation("com.auth0:java-jwt:4.3.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.1.0")
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+kotlin {
+	compilerOptions {
+		freeCompilerArgs.addAll '-Xjsr305=strict'
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

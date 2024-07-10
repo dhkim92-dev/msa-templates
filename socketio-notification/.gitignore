@@ -1,0 +1,10 @@
+test/*
+backend/api/build/*
+backend/node_modules/*
+backend/node_modules
+build/gradle/*
+frontend/.next
+frontend/.next/*
+frontend/node_modules
+frontend/node_modules/*
+

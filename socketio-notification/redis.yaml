@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        ports:
+        - name: redis-tcp
+          containerPort: 6379
+        volumeMounts:
+        - name: conf
+          mountPath: /etc/redis/redis.conf
+      volumes:
+      - name: conf
+        hostPath:
+          path: /Users/terrapin/workspace/study/socketio/infra/redis/redis.conf
+          type: File
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: redis
+  ports:
+  - name: redis-tcp
+    port: 6379
+    targetPort: 6379
